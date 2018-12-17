@@ -1,0 +1,215 @@
+<!doctype html>
+<html>
+<head>
+<title>T&uuml;rme von Hanoi</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="shortcut icon" type="image/x-icon" href="showimg/192.ico">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/css/bootstrap-select.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/js/bootstrap-select.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-colorpickersliders@3.1.1/dist/bootstrap.colorpickersliders.min.css" rel="stylesheet" type="text/css" media="all">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tinycolor/1.4.1/tinycolor.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-colorpickersliders@3.1.1/dist/bootstrap.colorpickersliders.min.js"></script>
+
+<script src="hanoi.js" type="text/javascript"></script>
+</head>
+
+<body>
+<div id="gameArena">
+	  <select id="num "name="num" style="padding: 2px 20px 2px 20px;" data-header="Anzahl der Scheiben" class="selectpicker show-tick" data-width="fit" data-style="btn-primary" data-live-search="true" onchange="chgNumPts(this.value)" >
+			<option data-subtext="Noob">2</option> 
+			<option data-subtext="Einfach" selected>3</option>
+			<option data-subtext="OK!">4</option>
+			<option data-subtext="Mittel">5</option>
+			<option data-subtext="Schwer">6</option>
+			<option data-subtext="Eindrucksvoll (Experimental)">7</option>
+			<option data-subtext="Chuck Norris (Experimental)">8</option>
+			<option data-subtext="Cheater (Experimental)">9</option>
+	  </select>
+	  <button id="restart" class="btn btn-success" onclick="newGame()">Restart</button>
+	
+	  
+		<select id="speed" name="speed" style="padding: 2px 20px 2px 20px;" data-header="Geschwindigkeit" class="selectpicker show-tick" data-width="fit" data-style="btn-primary" data-live-search="true" onchange="chgSpeed(this.value)" >
+			<option data-subtext="Langsam">1</option>
+			<option data-subtext="Normal" selected>5</option>
+			<option data-subtext="Normal 2.0">10</option>
+			<option data-subtext="Normal 3.2">25</option>
+			<option data-subtext="Schnell">50</option>
+			<option data-subtext="c<sub>0</sub>=299792458 m/s">100</option>
+		</select>
+		<button id="solve" class="btn btn-danger"  onclick="solveIt()" >Solve!</button>
+
+		<button id="btn_settings" class="btn btn-info"  onclick="$('#modal-settings').modal('show')" ><span class="glyphicon glyphicon-cog"></span></button>
+
+		<button id="btn_info" class="btn btn-default"  onclick="$('#modal-info').modal('show')" ><span class="glyphicon glyphicon-info-sign"></span></button>
+
+		<button id="btn_download" class="btn btn-default"  onclick="window.open('https://build.phonegap.com/apps/1932243/share','_self')" ><span class="glyphicon glyphicon-download"></span>Download</button>
+	<div class="row">
+	  <div class="col-sm-4"><span id="moves" style="font-weight: bold; font-size: larger;">Z&uuml;ge: 0</span></div>
+	  <div class="col-sm-4"><div id="info" style="font-weight: bold; font-size: larger;">Minimale Anzahl: 7</div></div>
+	</div>
+	
+	<canvas id="spiel" width="" height="" style="z-index:2;"></canvas>
+
+</div>
+
+
+<!-- MODALS -->
+
+<!-- SUCCESS -->
+<div class="modal fade" tabindex="-1" id="modal-success" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Sie haben gewonnen!</h4>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-success" role="alert"><b id="name">Herzlichen Gl&uuml;ckwunsch!</b> Sie haben das Problem selbst gel&ouml;&szlig;t!</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal" onclick="newGame()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INFO -->
+<div class="modal fade" tabindex="-1" id="modal-info" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Informationen und Anleitung</h4>
+      </div>
+      <div class="modal-body">
+		<p>Die Turme von Hanoi </br>
+Es ist deine Aufgabe, den aus n gestapelten Bausteinen bestehenden Turm vom ersten Turm auf
+den letzten (unter Zuhilfenahme eines dritten Turmes in der Mitte) zu versetzen.</br>
+</p><b>Aber Achtung: </b><p>
+Es ist nicht so einfach, wie es zun&auml;chst klingt! Du musst n&auml;mlich folgende Regeln
+beachten:</p>
+<ul class="list-group">
+<li class="list-group-item">Du darfst pro Zug nur einen Stein bewegen.</li>
+<li class="list-group-item">Nach einem Zug m&uuml;ssen alle n Steine auf einem der drei Feldern liegen.</li>
+<li class="list-group-item">Du darfst nie einen gr&ouml;&szlig;eren auf einen kleineren Stein legen.</li>
+</ul>
+<div class="alert alert-info" role="alert">Findest Du einen Weg den kompletten Turm zu verlegen?</div>
+<p style="font-size: larger;">&copy; Paul S&uuml;tterlin / Lennart Arthen</p>
+<div class="panel panel-default">
+  <div class="panel-heading">Verwendete Fremdsoftware</div>
+  <div class="panel-body">
+  <ul style="font-size: smaller;">
+  <li>bootstrap-select;Silvio Moreto ; MIT-Licence; https://github.com/silviomoreto/bootstrap-select</li>
+  <li>bootstrap; Twitter Inc.; MIT-Licence; https://github.com/twbs/bootstrap</li>
+<li>jQuery; jQuery Foundation; MIT-Licence; https://github.com/jquery/jquery</li>
+<li>bootstrap.colorpickersliders; virtuosoft.eu; MIT-Licence; https://github.com/istvan-ujjmeszaros/bootstrap-colorpickersliders</li>
+<li>ColorList; bobspace; "Use it as you please"; https://gist.github.com/bobspace/2712980</li>
+<li>Rounded Corners ; Grumdrig@stackoverflow; http://stackoverflow.com/questions/1255512/how-to-draw-a-rounded-rectangle-on-html-canvas</li>
+<li>Rezising Element; Derek Detweiler; Apache 2.0 Lizenz; http://www.html5rocks.com/en/tutorials/casestudies/gopherwoord-studios-resizing-html5-games/</li> 
+  
+  </ul></div>
+</div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal" onclick="newGame()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Settings -->
+<div class="modal fade" tabindex="-1" id="modal-settings" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Einstellungen</h4>
+      </div>
+      <div class="modal-body">
+		<div class="input-group">
+		  <span class="input-group-addon">@</span>
+		  <input type="text" class="form-control" id="setName" placeholder="Ihr Name" />
+		</div>
+		<label for="colorpole"></label>
+		<div class="input-group">
+			  <span class="input-group-addon">Ger&uuml;st</span>
+              <input type="text" class="color form-control" data-color-format="hex" id="colorpole" value="#dd4433">
+		</div>
+		<label for="colorline"></label>
+		<div class="input-group">
+			  <span class="input-group-addon">Farbe der R&auml;nder</span>
+              <input type="text" class="color form-control" data-color-format="hex" id="colorline" value="#000000">
+		</div>
+		<label for="color1"></label>
+		<div class="input-group">
+			  <span class="input-group-addon">1. Stein</span>
+              <input type="text" class="color form-control" data-color-format="hex" id="color1" value="#FF0000">
+		</div>
+		<label for="color2"></label>
+		<div class="input-group">
+			  <span class="input-group-addon">2. Stein</span>
+              <input type="text" class="color form-control" data-color-format="hex" id="color2" value="#00FF00">
+		</div>
+		<label for="color3"></label>
+		<div class="input-group">
+			  <span class="input-group-addon">3. Stein</span>
+              <input type="text" class="color form-control" data-color-format="hex" id="color3" value="#FFFF00">
+		</div>
+		<label for="color4"></label>
+		<div class="input-group">
+			  <span class="input-group-addon">4. Stein</span>
+              <input type="text" class="color form-control" data-color-format="hex" id="color4" value="#808080">
+		</div>
+		<label for="color5"></label>
+		<div class="input-group">
+			  <span class="input-group-addon">5. Stein</span>
+              <input type="text" class="color form-control" data-color-format="hex" id="color5" value="#FF00FF">
+		</div>
+		<label for="color6"></label>
+		<div class="input-group">
+			  <span class="input-group-addon">6. Stein</span>
+              <input type="text" class="color form-control" data-color-format="hex" id="color6" value="#0000FF">
+		</div>
+		<label for="color7"></label>
+		<div class="input-group">
+			  <span class="input-group-addon">7. Stein</span>
+              <input type="text" class="color form-control" data-color-format="hex" id="color7" value="#000000">
+		</div>
+		<label for="color8"></label>
+		<div class="input-group">
+			  <span class="input-group-addon">8. Stein</span>
+              <input type="text" class="color form-control" data-color-format="hex" id="color8" value="#87CEFA">
+		</div>
+		<label for="color9"></label>
+		<div class="input-group">
+			  <span class="input-group-addon">9. Stein</span>
+              <input type="text" class="color form-control" data-color-format="hex" id="color9" value="#800000">
+		  </div>
+		<script>
+	
+		</script>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-dismiss="modal" onClick="resetSettings();">Reset</button>
+		<button type="button" class="btn btn-warning" data-dismiss="modal" >Schlie&szlig;en</button>
+		<button type="button" class="btn btn-primary" data-dismiss="modal" onClick="saveSettings();">Speichern 	&amp; Schlie&szlig;en</button>
+	  </div>
+    </div>
+  </div>
+</div>
+<script>
+
+
+</script>
+
+
+<!-- LICENCE
+-->
+
+</body>
+</html>
